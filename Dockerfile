@@ -19,7 +19,6 @@ EXPOSE 8080
 # Copiar el JAR generado desde la etapa de construcción
 COPY --from=build /app/target/*.jar app.jar
 
-# Copiar el archivo JSON de Firebase
-COPY serviceAccountKey.json serviceAccountKey.json
 
+# Definir que la app usará variables de entorno
 ENTRYPOINT ["java", "-jar", "app.jar"]
