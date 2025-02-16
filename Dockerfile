@@ -1,13 +1,13 @@
-# Primera etapa: Construcción del JAR
+# Etapa de construcción
 FROM ubuntu:latest AS build
 
-# Actualizar e instalar JDK y dependencias
-RUN apt-get update && apt-get install -y openjdk-17-jdk curl unzip
+# Instalar dependencias
+RUN apt-get update && apt-get install -y openjdk-17-jdk curl
 
-# Establecer directorio de trabajo
+# Configurar directorio de trabajo
 WORKDIR /app
 
-# Copiar el código fuente al contenedor
+# Copiar archivos del proyecto
 COPY . .
 
 # Dar permisos de ejecución al wrapper de Gradle
@@ -16,16 +16,14 @@ RUN chmod +x ./gradlew
 # Construir la aplicación
 RUN ./gradlew bootJar --no-daemon
 
-# Segunda etapa: Imagen final optimizada para ejecución
-FROM eclipse-temurin:17-jdk-alpine
-
-# Establecer directorio de trabajo
+# Etapa final
+FROM openjdk:17-jdk-slim
 WORKDIR /app
 
-# Exponer el puerto 8080
+# Exponer puerto
 EXPOSE 8080
 
-# Copiar el JAR generado desde la etapa anterior
+# Copiar el JAR generado
 COPY --from=build /app/build/libs/*.jar app.jar
 
 # Ejecutar la aplicación
