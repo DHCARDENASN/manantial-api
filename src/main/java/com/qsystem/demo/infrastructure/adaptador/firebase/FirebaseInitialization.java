@@ -1,8 +1,10 @@
 package com.qsystem.demo.infrastructure.adaptador.firebase;
 
+import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
 
 import com.google.auth.oauth2.GoogleCredentials;
@@ -17,15 +19,24 @@ public class FirebaseInitialization {
 	@PostConstruct
 	public void initialization() {
 		try {
-			if (FirebaseApp.getApps().isEmpty()) { // Verifica si ya está inicializado
-				FileInputStream serviceAccount = new FileInputStream("./serviceAccountKey.json");
-				FirebaseOptions options = new FirebaseOptions.Builder()
-						.setCredentials(GoogleCredentials.fromStream(serviceAccount))
-						.build();
-				FirebaseApp.initializeApp(options);
-			}
+			try {
+				String firebaseConfig = System.getenv("FIREBASE_CREDENTIALS");
+				if (firebaseConfig == null || firebaseConfig.isEmpty()) {
+					throw new IllegalStateException("No se encontró la variable de entorno FIREBASE_CREDENTIALS");
+				}
 
-		} catch (IOException e) {
+				ObjectMapper objectMapper = new ObjectMapper();
+				byte[] firebaseJson = objectMapper.writeValueAsBytes(objectMapper.readTree(firebaseConfig));
+
+				FirebaseOptions options = new FirebaseOptions.Builder()
+						.setCredentials(GoogleCredentials.fromStream(new ByteArrayInputStream(firebaseJson)))
+						.build();
+
+				FirebaseApp.initializeApp(options);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
