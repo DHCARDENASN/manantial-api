@@ -17,13 +17,14 @@ public class FirebaseInitialization {
 	@PostConstruct
 	public void initialization() {
 		try {
-			FileInputStream serviceAccount = new FileInputStream("./serviceAccountKey.json");
-			FirebaseOptions options;
-			options = new FirebaseOptions.Builder()
-					.setCredentials(GoogleCredentials.fromStream(serviceAccount))
-					.build();
+			if (FirebaseApp.getApps().isEmpty()) { // Verifica si ya está inicializado
+				FileInputStream serviceAccount = new FileInputStream("./serviceAccountKey.json");
+				FirebaseOptions options = new FirebaseOptions.Builder()
+						.setCredentials(GoogleCredentials.fromStream(serviceAccount))
+						.build();
+				FirebaseApp.initializeApp(options);
+			}
 
-			FirebaseApp.initializeApp(options);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
